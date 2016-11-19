@@ -2319,6 +2319,20 @@ ISCTF{St3nd1ng_1n_4he_ha11_of_Pa1n!}
 
 ## [Bon2000] wanna play or wanna sleep
 
+### 풀이
+
+문제와 함께 올라온 `Longboard.bmp` 파일의 픽셀 배열을 잘 살펴보면, 오른쪽으로 27픽셀씩 어긋나있음을 알 수 있다.
+
+이미지의 원본 크기가 628x800 이므로 헤더를 조작하여 width를 27픽셀 줄인 601x835로 이미지 크기를 변경한다. 이미지를 열어보면 이미지에 포함된 키를 읽을 수 있다.
+
+![](Bon2000/Longboard.modified.bmp)
+
+### Answer flag
+
+````
+ISCTF{Let1s_L0ngbo4rdinq}
+````
+
 ## [Bon2300] Easy_Steganography
 
 ## [Bon2700] PPAP
