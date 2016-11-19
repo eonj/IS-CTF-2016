@@ -1106,7 +1106,7 @@ flag of korea
 3. 위 프로그램을 사용하여 전체 이미지의 내용을 해석한 문자열을 실제 텍스트 파일로 출력한다. (텍스트 덤프 첨부함)
 4. Flag로 텍스트 파일 내에서 검색하면 문자열 `Flag=V!oL3n7Lu9i@`을 찾을 수 있다. `Flag=` 뒤에 있는 값이 문제가 요구하는 키값.
 
-### 재귀 압축 해제 코드: CTFZipExtractor
+### 재귀 압축 해제 프로그램 소스 코드: CTFZipExtractor
 
 ````csharp
 using System;
@@ -1177,7 +1177,7 @@ namespace CTFZipExtractor
 }
 ````
 
-### 문자 인식 코드: CTFShitProcessor
+### 문자 인식 프로그램 소스 코드: CTFShitProcessor
 
 ````csharp
 using System;
@@ -2013,6 +2013,157 @@ greatpark1819
 ````
 
 ## [Misc3000] I got you in my sights
+
+문제 첨부파일 이미지 `Boop.jpg`
+
+메타데이터 영역에서 유의미해 보이는 두 문자열
+
+`Anna;Eichenwald;Sombra`, `P1zz4_Hanz0_gak_`
+
+패딩 영역에서 문자열 `Boop!!!!`을 찾았고, 그 이후로 공백문자를 제거한 다음부터 나온 Byte sequence block을 해독하기로 했다. `Anna;Eichenwald;Sombra` 로부터 AES 알고리즘이라는 힌트를 얻어 `P1zz4_Hanz0_gak_` 을 키로 AES128 ECB decrypt 하였다. (해독한 파일 덤프를 첨부)
+
+그래서 나온 결과값을 bitmap 이미지로 추측 (파일 크기가 정확히 1920000 바이트였으며 FF부터 시작해서 값이 점진적으로 바뀌는 바이트 패턴을 보고 추측함), 직접 bitmap 데이터를 만들며 크기, 형식, 이미지 패턴 등을 추측하여 완성된 이미지를 얻어냈다. (C# 코드를 첨부)
+
+결과는 픽셀당 24bit color를 사용하며, 800x800 정사각형 이미지를 5조각으로 나눠 각 y축 라인에 한번씩 교차해서 출력한 이미지 (해당 이미지 사이즈는 160*4000) 였다. 5개 이미지로 올바르게 출력한 뒤 합쳐서 이미지에 적힌 키값을 보고 인증.
+
+### AES decrypt 대상 블록 및 결과 블록
+
+대상: (0x00012926부터)
+
+````
+000128d0: 426f 6f70 2121 2121 0000 0000 0000 0000  Boop!!!!........
+000128e0: 0000 0000 0000 0000 0000 0000 0000 0000  ................
+000128f0: 424d 364c 1d00 0000 0000 3600 0000 2800  BM6L......6...(.
+00012900: 0000 2003 0000 2003 0000 0100 1800 0000  .. ... .........
+00012910: 0000 0000 0000 0000 0000 0000 0000 0000  ................
+00012920: 0000 0000 0000 6c46 9176 43c5 afc0 d103  ......lF.vC.....
+00012930: d8bd 5237 a22e 7720 d225 ee46 e1c2 8be5  ..R7..w .%.F....
+00012940: fa6f 5150 bb4c c149 b76f a485 fd8e 0ff2  .oQP.L.I.o......
+00012950: 08a5 69bd 3dc7 4aa9 7a07 de70 6655 12f6  ..i.=.J.z..pfU..
+00012960: 8e0d 3077 aeba 7720 d225 ee46 e1c2 8be5  ..0w..w .%.F....
+00012970: fa6f 5150 bb4c c149 b76f a485 fd8e 0ff2  .oQP.L.I.o......
+00012980: 08a5 69bd 3dc7 202b 05af 51a2 99a6 eac0  ..i.=. +..Q.....
+00012990: 6b58 f56d 6857 b904 0363 ff8e a162 e360  kX.mhW...c...b.`
+000129a0: b353 c043 7ed5 b904 0363 ff8e a162 e360  .S.C~....c...b.`
+000129b0: b353 c043 7ed5 b904 0363 ff8e a162 e360  .S.C~....c...b.`
+000129c0: b353 c043 7ed5 b904 0363 ff8e a162 e360  .S.C~....c...b.`
+000129d0: b353 c043 7ed5 b904 0363 ff8e a162 e360  .S.C~....c...b.`
+000129e0: b353 c043 7ed5 b904 0363 ff8e a162 e360  .S.C~....c...b.`
+000129f0: b353 c043 7ed5 b904 0363 ff8e a162 e360  .S.C~....c...b.`
+00012a00: b353 c043 7ed5 b904 0363 ff8e a162 e360  .S.C~....c...b.`
+(...)
+001e7500: 1aad d489 b4c6 dfcc ecbc ab9b 7517 ed93  ............u...
+001e7510: a79a 9281 5b22 f9e5 3b34 4689 ddf1 3f8e  ....["..;4F...?.
+001e7520: 06c1 ea3c 8d43                           ...<.C
+(END)
+````
+
+결과:
+
+````
+00000000: ffff ffff fffe ffff feff fffe ffff feff  ................
+00000010: fffe ffff feff fffe ffff feff fffe ffff  ................
+00000020: feff fffe ffff feff fffe ffff feff fffe  ................
+00000030: ffff feff fffe ffff feff fffe ffff feff  ................
+00000040: fffe ffff feff fffe ffff feff fffe ffff  ................
+00000050: feff fffe ffff feff fffe ffff feff fffe  ................
+00000060: ffff feff fffe ffff feff ffff ffff ffff  ................
+00000070: ffff ffff ffff ffff ffff ffff ffff ffff  ................
+00000080: ffff ffff ffff ffff ffff ffff ffff ffff  ................
+00000090: ffff ffff ffff ffff ffff ffff ffff ffff  ................
+000000a0: ffff ffff ffff ffff ffff ffff ffff ffff  ................
+000000b0: ffff ffff ffff ffff ffff ffff ffff ffff  ................
+000000c0: ffff ffff ffff ffff ffff ffff ffff ffff  ................
+000000d0: ffff ffff ffff ffff ffff ffff ffff ffff  ................
+000000e0: ffff ffff ffff ffff ffff ffff ffff ffff  ................
+000000f0: ffff ffff ffff ffff ffff ffff ffff ffff  ................
+00000100: ffff ffff ffff ffff ffff ffff ffff ffff  ................
+00000110: ffff ffff ffff ffff ffff ffff ffff fffe  ................
+00000120: ffff feff fffe ffff feff fffe ffff feff  ................
+00000130: fffe ffff feff fffe ffff feff ffff ffff  ................
+00000140: ffff ffff ffff ffff ffff ffff ffff fffe  ................
+00000150: ffff feff fffe ffff feff ffff ffff ffff  ................
+00000160: fffe ffff feff fffe ffff feff fffe ffff  ................
+00000170: feff fffe ffff feff ffff ffff ffff fffe  ................
+00000180: ffff feff fffe ffff feff fffe ffff feff  ................
+00000190: fffd ffff fdff fffd ffff fdff fffd ffff  ................
+000001a0: fdff fffd ffff fdff fffd ffff fdff fffd  ................
+000001b0: ffff fdff fffd ffff fdff fffe ffff feff  ................
+000001c0: fffe ffff feff fffe ffff feff fffd ffff  ................
+000001d0: fdff fffd ffff fdff fffe ffff feff fffe  ................
+000001e0: ffff feff fffd ffff fdff fffd ffff fdff  ................
+000001f0: fffd ffff fdff fffd ffff fdff fffd ffff  ................
+00000200: fdff fffd ffff fdff fffc ffff fcff fffc  ................
+00000210: ffff fcff fffd ffff fdff fffd ffff fdff  ................
+00000220: fffd ffff fdff fffd ffff fdff fffc ffff  ................
+(...)
+001d4bc0: a8cf a8a7 cfa8 a7cf a8a7 cfa8 a7cf a8a7  ................
+001d4bd0: cfa8 a7cf a8a7 cfa7 a7cf a7a7 cfa7 a7cf  ................
+001d4be0: a7a7 cfa8 a7cf a9a8 cfa9 a8cf a9a9 cfa9  ................
+001d4bf0: a9cf a8a8 d0a8 a8d1 a8a8 d1a8 a8d1 a8a9  ................
+````
+
+### 이미지 변환 프로그램 소스 코드: CTFHanzoGakImageRenderer
+
+````csharp
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.IO;
+using System.Drawing;
+
+namespace CTFHanzoGakImageRenderer
+{
+	class Program
+	{
+		const string c_hanzogak		= "PizzaHanzoGakAES.dat";
+		const int   c_width			= 160;
+		const int   c_height		= 800;
+		const int   c_bytePerPixel  = 3;
+		const int   c_imageCount    = 5;
+
+		static void Main(string[] args)
+		{
+			var buffer		= new byte[c_bytePerPixel];
+			var bitmaps		= new Bitmap[5];
+			for(var i = 0; i < bitmaps.Length; i++)
+				bitmaps[i]	= new Bitmap(c_width, c_height);
+			var pixelcount	= 0;
+
+			using (var file = new FileStream(c_hanzogak, FileMode.Open))
+			{
+				while(file.Read(buffer, 0, c_bytePerPixel) > 0)
+				{
+					var color   = Color.FromArgb(255, buffer[2], buffer[1], buffer[0]);
+					var x       = pixelcount % c_width;
+					var y       = pixelcount / c_width;
+
+					bitmaps[y % c_imageCount].SetPixel(x, c_height - (y / c_imageCount) -  1, color);
+
+					pixelcount++;
+				}
+			}
+
+			for(var i = 0; i < c_imageCount; i++)
+			{
+				bitmaps[i].Save("hanzogak_output" + i + ".png", System.Drawing.Imaging.ImageFormat.Png);
+			}
+		}
+	}
+}
+````
+
+위 프로그램을 컴파일해 PizzaHanzoGakAES.dat 파일과 동일 경로에서 실행하면 hanzogak_output0.png ~ hanzogak_output4.png를 얻는다. (순서대로)
+
+![](Misc3000/hanzogak_output0.png) ![](Misc3000/hanzogak_output1.png) ![](Misc3000/hanzogak_output2.png) ![](Misc3000/hanzogak_output3.png) ![](Misc3000/hanzogak_output4.png)
+
+### Answer flag
+
+````
+Ryu_Y0_W4g4_T3k1_W0_Kur43
+````
 
 ## [Web1000] Welcome to web challenge
 
