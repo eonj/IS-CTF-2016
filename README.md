@@ -1611,6 +1611,258 @@ d2pkcWhxaGdoV0tE
 
 ## Misc2600
 
+### 풀이
+
+1. 문제로 제시된 코드를 Python interpreter에서 실행하면 코드가 실행된다. 실행이 끝나면 global name에 해당 코드가 생성한 함수 오브젝트가 남는다. (`func`)
+2. `dis` 모듈을 활용, `__import__('dis').dis(func)` 코드를 실행하면 해당 함수를 디스어셈블한 코드를 볼 수 있다. (디스어셈블한 결과를 첨부함)
+3. 해당 코드는 파일 형식을 맞춰서 pyc (파이썬 바이트코드 파일)로 저장하더라도 디컴파일러가 작동하지 않는다. (정규 바이트코드에는 포함되지 않는 코드 형식이 있어서 그런 것으로 추측.) 따라서 디스어셈블된 코드를 보고 직접 key 변수값을 만드는 과정을 추적했다. (디스어셈블된 코드를 보고 만든 python 코드조각을 첨부함)
+4. 해당 코드를 python interpreter로 실행하여 key값을 만들어서 인증.
+
+### pyc 디스어셈블 결과
+
+````
+  2           0 LOAD_GLOBAL              0 (chr)
+              3 NOP
+              4 LOAD_CONST               2 (95)
+              7 CALL_FUNCTION            1
+
+  3          10 STORE_FAST               0 (key)
+             13 LOAD_GLOBAL              0 (chr)
+             16 LOAD_CONST               3 (124)
+             19 CALL_FUNCTION            1
+
+  4          22 LOAD_FAST                0 (key)
+             25 BINARY_ADD
+             26 STORE_FAST               0 (key)
+             29 LOAD_GLOBAL              0 (chr)
+             32 LOAD_CONST               4 (94)
+             35 CALL_FUNCTION            1
+
+  5          38 LOAD_FAST                0 (key)
+             41 BINARY_ADD
+             42 STORE_FAST               0 (key)
+             45 LOAD_FAST                0 (key)
+             48 LOAD_CONST               0 (None)
+             51 LOAD_CONST               0 (None)
+
+  6          54 LOAD_CONST               5 (-1)
+             57 BUILD_SLICE              3
+             60 BINARY_SUBSCR
+             61 LOAD_GLOBAL              0 (chr)
+             64 LOAD_CONST               6 (46)
+             67 CALL_FUNCTION            1
+             70 BINARY_ADD
+             71 LOAD_FAST                0 (key)
+             74 BINARY_ADD
+             75 STORE_FAST               0 (key)
+             78 LOAD_GLOBAL              0 (chr)
+             81 LOAD_CONST               7 (78)
+             84 CALL_FUNCTION            1
+
+  7          87 LOAD_FAST                0 (key)
+             90 BINARY_ADD
+             91 LOAD_CONST               0 (None)
+             94 LOAD_CONST               0 (None)
+             97 LOAD_CONST               5 (-1)
+            100 BUILD_SLICE              3
+            103 BINARY_SUBSCR
+            104 LOAD_GLOBAL              0 (chr)
+            107 LOAD_CONST               8 (111)
+            110 CALL_FUNCTION            1
+            113 BINARY_ADD
+            114 STORE_FAST               0 (key)
+            117 LOAD_GLOBAL              0 (chr)
+            120 LOAD_CONST               9 (103)
+            123 CALL_FUNCTION            1
+
+  8         126 LOAD_FAST                0 (key)
+            129 BINARY_ADD
+            130 LOAD_GLOBAL              0 (chr)
+            133 NOP
+            134 LOAD_CONST              10 (104)
+            137 CALL_FUNCTION            1
+            140 BINARY_ADD
+            141 STORE_FAST               0 (key)
+            144 LOAD_GLOBAL              0 (chr)
+            147 NOP
+            148 LOAD_CONST              11 (90)
+            151 CALL_FUNCTION            1
+            154 POP_TOP
+            155 LOAD_GLOBAL              0 (chr)
+            158 NOP
+            159 LOAD_CONST               9 (103)
+
+ 10         162 CALL_FUNCTION            1
+            165 POP_TOP
+            166 LOAD_GLOBAL              0 (chr)
+            169 NOP
+            170 LOAD_CONST              12 (32)
+            173 CALL_FUNCTION            1
+            176 POP_TOP
+            177 LOAD_GLOBAL              0 (chr)
+            180 LOAD_CONST              12 (32)
+            183 CALL_FUNCTION            1
+            186 POP_TOP
+            187 LOAD_GLOBAL              0 (chr)
+            190 LOAD_CONST              12 (32)
+            193 CALL_FUNCTION            1
+            196 POP_TOP
+            197 LOAD_GLOBAL              0 (chr)
+            200 NOP
+            201 LOAD_CONST              13 (80)
+            204 CALL_FUNCTION            1
+            207 LOAD_GLOBAL              0 (chr)
+            210 LOAD_CONST              14 (121)
+            213 CALL_FUNCTION            1
+            216 BINARY_ADD
+            217 LOAD_GLOBAL              0 (chr)
+            220 NOP
+            221 LOAD_CONST              15 (116)
+            224 CALL_FUNCTION            1
+            227 BINARY_ADD
+            228 LOAD_FAST                0 (key)
+            231 LOAD_CONST               0 (None)
+            234 LOAD_CONST               0 (None)
+            237 LOAD_CONST               5 (-1)
+            240 BUILD_SLICE              3
+            243 BINARY_SUBSCR
+            244 BINARY_ADD
+            245 LOAD_GLOBAL              0 (chr)
+            248 LOAD_CONST               8 (111)
+            251 CALL_FUNCTION            1
+            254 BINARY_ADD
+            255 LOAD_GLOBAL              0 (chr)
+            258 LOAD_CONST               1 (83)
+            261 CALL_FUNCTION            1
+            264 BINARY_ADD
+            265 STORE_FAST               0 (key)
+            268 LOAD_GLOBAL              0 (chr)
+
+ 15         271 NOP
+            272 LOAD_CONST              16 (97)
+            275 CALL_FUNCTION            1
+            278 LOAD_GLOBAL              0 (chr)
+            281 LOAD_CONST              17 (114)
+            284 CALL_FUNCTION            1
+            287 BINARY_ADD
+            288 LOAD_GLOBAL              0 (chr)
+            291 NOP
+            292 LOAD_CONST              18 (51)
+            295 CALL_FUNCTION            1
+            298 BINARY_ADD
+            299 LOAD_FAST                0 (key)
+            302 BINARY_ADD
+            303 LOAD_GLOBAL              0 (chr)
+            306 LOAD_CONST              19 (117)
+            309 CALL_FUNCTION            1
+            312 BINARY_ADD
+            313 STORE_FAST               0 (key)
+            316 LOAD_GLOBAL              0 (chr)
+            319 LOAD_CONST              20 (85)
+            322 CALL_FUNCTION            1
+            325 LOAD_GLOBAL              0 (chr)
+            328 NOP
+            329 LOAD_CONST              21 (48)
+            332 CALL_FUNCTION            1
+            335 BINARY_ADD
+            336 LOAD_GLOBAL              0 (chr)
+            339 LOAD_CONST              14 (121)
+            342 CALL_FUNCTION            1
+            345 BINARY_ADD
+            346 LOAD_CONST               0 (None)
+            349 LOAD_CONST               0 (None)
+            352 LOAD_CONST               5 (-1)
+            355 BUILD_SLICE              3
+            358 BINARY_SUBSCR
+            359 LOAD_FAST                0 (key)
+            362 BINARY_ADD
+            363 STORE_FAST               0 (key)
+
+ 17         366 LOAD_GLOBAL              0 (chr)
+            369 LOAD_CONST              11 (90)
+            372 CALL_FUNCTION            1
+            375 POP_TOP
+
+ 18         376 LOAD_FAST                0 (key)
+            379 LOAD_GLOBAL              0 (chr)
+            382 LOAD_CONST              22 (126)
+            385 CALL_FUNCTION            1
+            388 LOAD_GLOBAL              0 (chr)
+            391 LOAD_CONST              23 (33)
+            394 CALL_FUNCTION            1
+            397 BINARY_ADD
+            398 LOAD_GLOBAL              0 (chr)
+            401 LOAD_CONST              24 (64)
+            404 CALL_FUNCTION            1
+            407 BINARY_ADD
+            408 BINARY_ADD
+            409 STORE_FAST               0 (key)
+
+ 20         412 LOAD_CONST               5 (-1)
+            415 LOAD_CONST               0 (None)
+            418 IMPORT_NAME              1 (time)
+            421 STORE_FAST               1 (time)
+
+ 21         424 LOAD_FAST                0 (key)
+            427 LOAD_GLOBAL              2 (raw_input)
+            430 LOAD_CONST              25 ('Password: ')
+            433 CALL_FUNCTION            1
+            436 COMPARE_OP               2 (==)
+            439 POP_JUMP_IF_FALSE      463
+
+ 22         442 LOAD_FAST                1 (time)
+            445 LOAD_ATTR                3 (sleep)
+            448 LOAD_CONST              26 (10)
+            451 CALL_FUNCTION            1
+            454 POP_TOP
+
+ 23         455 LOAD_CONST              27 ('Correct! good job!!')
+            458 PRINT_ITEM
+            459 PRINT_NEWLINE
+            460 JUMP_FORWARD            18 (to 481)
+
+ 25     >>  463 LOAD_FAST                1 (time)
+            466 LOAD_ATTR                3 (sleep)
+            469 LOAD_CONST              26 (10)
+            472 CALL_FUNCTION            1
+            475 POP_TOP
+
+ 26         476 LOAD_CONST              28 ('Wrong password, try again! Plz do not bruteforce-it :)')
+            479 PRINT_ITEM
+            480 PRINT_NEWLINE
+        >>  481 LOAD_CONST               0 (None)
+            484 RETURN_VALUE
+
+````
+
+### 분석 결과
+
+````python
+key = chr(95)
+key = chr(124) + key
+key = chr(94) + key
+key = key[::-1] + chr(46) + key
+key = (chr(78) + key)[::-1] + chr(111)
+key = chr(103) + key + chr(104)
+key = chr(80)  + chr(121) + chr(116) + key[::-1] + chr(111) + chr(83)
+key = chr(97) + chr(114) + chr(51) + key + chr(117)
+key = (chr(85) + chr(48) + chr(121))[::-1] + key
+key = key + chr(126) + chr(33) + chr(64)
+````
+
+실행 결과:
+
+````
+>>> print(key)
+y0Uar3PythoN_|^.^|_goSu~!@
+````
+
+### Answer flag
+
+````
+ISCTF{y0Uar3PythoN_|^.^|_goSu~!@}
+````
+
 ## Misc2700
 
 ## Misc2800
