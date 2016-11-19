@@ -2247,6 +2247,76 @@ ISCTF{fb8027a2737dd2c0c8a3b82be28e8ee5}
 
 ## [Bon1700] The script
 
+### 풀이
+
+문제 첨부파일인 `srcode.cpp`은 flag string을 입력받아 `hash()`해서 `check()`하는 프로그램이다. `check()`는 hash 결과가 `enc_flag[]` 값과 일치하는지를 반환한다.
+
+`hash()` 함수를 임의의 문자열에 4번 적용하면 원래 값으로 돌아오는 특성을 발견, `hash()` 결과가 `enc_flag[]`와 같기 위해서는 원본 값이 `enc_flag[]`에 `hash()`를 3번 적용해서 나온 값과 같아야 하기 때문에 빠르게 코드를 작성할 수 있었다.
+
+### enc_flag[] dehash 프로그램 소스 코드
+
+(srcode.cpp를 활용해 작성함)
+
+````
+#include <cstdio>
+#include <iostream>
+#include <iomanip>
+#include <string>
+#include <cstring>
+#include <functional>
+#include <algorithm>
+
+typedef unsigned char byte;
+
+static byte enc_flag[] = {
+	0x94, 0x1d, 0x1c, 0x51, 0x58, 0x82, 0x1d, 0x53,
+	0x0f, 0xda, 0x52, 0x07, 0xda, 0x5e, 0xdd, 0x07,
+	0xda, 0xdd, 0x43, 0x92, 0x56, 0xdd, 0x92, 0x16,
+	0x07, 0x07, 0xdd, 0xde, 0x5a, 0xdd, 0x11, 0x16,
+	0x07, 0xda, 0x06, 0x86, 0x00
+};
+
+static byte *hash(byte *in, size_t size)
+{
+	byte c;
+	byte *p = in;
+
+	while (size--)
+	{
+		c = (*p & 3) << 2;
+		c |= (*p & 12) << 4;
+		c |= (*p & 48) >> 4;
+		c |= (*p & 192) >> 2;
+
+		*p++ = c;
+	}
+
+	return in;
+}
+
+int main() {
+	size_t i, len;
+	len = sizeof(enc_flag);
+	hash(enc_flag, len);
+	hash(enc_flag, len);
+	hash(enc_flag, len);
+	puts((char *)enc_flag);
+	return 0;
+}
+````
+
+실행 결과
+
+````
+ISCTF(St3nd1ng_1n_4he_ha11_of_Pa1n!)
+````
+
+### Answer flag
+
+````
+ISCTF{St3nd1ng_1n_4he_ha11_of_Pa1n!}
+````
+
 ## [Bon2000] wanna play or wanna sleep
 
 ## [Bon2300] Easy_Steganography
