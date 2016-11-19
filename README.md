@@ -2221,6 +2221,30 @@ ISCTF{Easily done by php magic hash}
 
 ## [Bon1500] KiKiKiKiKiKi
 
+### 풀이
+
+첨부파일 `Gathering_key.pptx`을 읽어 보면 모든 Key를 찾아서 `_`로 접합해서 MD5 값을 구해 Answer flag 포맷에 맞춰 제출하면 됨을 알 수 있다. Key의 개수는 6개이다.
+
+* FirstKey: Start
+* Key#2: Kimchi
+* Key#3: Danmoooji
+* Key#4: SoJoooo
+* Key#5: P1zzza
+* LastKey: K1mB0b
+
+슬라이드 마지막 페이지에 이미지로 들어있는 LastKey를 제외하면, pptx 파일을 `unzip` 해서 `grep -ir`로 모든 Key 값을 구할 수 있다.
+
+````
+$ echo -n "Start_Kimchi_Danmoooji_SoJoooo_P1zzza_K1mB0b" | md5sum
+fb8027a2737dd2c0c8a3b82be28e8ee5 *-
+````
+
+### Answer flag
+
+````
+ISCTF{fb8027a2737dd2c0c8a3b82be28e8ee5}
+````
+
 ## [Bon1700] The script
 
 ## [Bon2000] wanna play or wanna sleep
