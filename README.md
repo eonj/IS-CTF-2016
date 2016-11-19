@@ -1991,6 +1991,27 @@ ISCTF{E4sy_R3verS1ng?!}
 
 ## [Misc2800] Guessing
 
+### 풀이
+
+파일 `guessing.7z` 내부에 `MDCCCXIX.png`가 있다. `MDCCCXIX` = `1819`
+
+이미지의 흰색 배경은 일정한 색이 아닌데, `rgb(255, 255, 255)`인 배경과 달리 `rgb(254, 254, 254)` 색으로 다음 텍스트가 쓰여 있다.
+
+````
+33.667034
+-117.723680
+````
+
+좌표 `33.667034N 117.723680W`의 위치는 Orange County Great Park이다
+
+TOP SECRET. greatpark1819 는 최근 최순실 태블릿에서 나온 이메일 계정이다.
+
+### Answer flag
+
+````
+greatpark1819
+````
+
 ## [Misc3000] I got you in my sights
 
 ## [Web1000] Welcome to web challenge
