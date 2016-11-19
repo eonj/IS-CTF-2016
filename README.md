@@ -1468,7 +1468,35 @@ namespace CTFShitProcessor
 }
 ````
 
-### output.txt
+프로그램의 사용례
+
+````
+learnt! press any key to continue
+$ ./CTFShitProcessor.exe
+Usage :
+                        CTFShitProcessor -learn <image>
+                        CTFShitProcessor -check <image>
+                        CTFShitProcessor -scan
+                        CTFShitProcessor -scannomatch
+$ ./CTFShitProcessor.exe -learn 11111-.png
+enter the matching string : PBhh\e]@B5_CjwLD<
+````
+
+실행 환경 세팅
+
+![](Misc2300/usage-root.png)
+
+target 폴더 내용 (CTFZipExtractor 결과물 파일)
+
+![](Misc2300/usage-target.png)
+
+learn 폴더 내용 (위 11111-.png 입력 후)
+
+![](Misc2300/usage-learn.png)
+
+### 문자 인식 실행 결과
+
+ASCII GL 내 모든 문자에 대해 이미지가 확보되면 `./CTFShitProcessor -scan` 명령을 통해 다음 내용을 확보할 수 있다.
 
 ````
 target\11111-.png:PBhh\e]@B5_CjwLD<
