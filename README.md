@@ -29,9 +29,11 @@ ISCTF{Overfffffffflow!!}
 컴파일러 stub을 제외한 함수들은 main과 cat_flag 두 개가 존재한다.
 
 main:
+
 ![](ePwn1000/main.bmp)
 
 cat_flag:
+
 ![](ePwn1000/cat_flag.bmp)
 
 cat_flag 함수가 호출되어야 flag를 볼 수 있으나, cat_flag은 main에서 호출되지 않는다.
