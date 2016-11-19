@@ -2335,4 +2335,34 @@ ISCTF{Let1s_L0ngbo4rdinq}
 
 ## [Bon2300] Easy_Steganography
 
+![](Bon2300/hint.png)
+
+문제 첨부파일 `flying_professor.PNG`의 (275, 49) 위치부터 사진과는 다른 색상으로 덧씌워진 픽셀들이 있다. 색상 리스트는 RGB 888로 다음과 같다.
+
+````
+(118, 97, 106)
+(32, 99, 103)
+(120, 121, 120)
+(119, 32, 107)
+(108, 32, 110)
+(117, 118, 121)
+(104, 123, 122)
+(106, 112, 98)
+(122, 117, 95)
+(111, 110, 105)
+(120, 115, 103)
+(107, 106, 33)
+(125, 0, 0)
+````
+
+Byte sequence로 만들어서 출력해 보면 `vaj cgxyxw kl nuvyh{zjpbzu_onixsgkj!}`가 나온다. Vigenere ciper임을 알 수 있었다.
+
+Solver를 돌려서 결과로 `the answer is isctf{genius_vigenere!}`를 얻었다.
+
+### Answer flag
+
+````
+ISCTF{genius_vigenere!}
+````
+
 ## [Bon2700] PPAP
