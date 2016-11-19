@@ -2167,6 +2167,20 @@ Ryu_Y0_W4g4_T3k1_W0_Kur43
 
 ## [Web1000] Welcome to web challenge
 
+### 풀이
+
+CTF 모든 페이지의 HTML 소스코드 하단에 다음 내용이 주석처리되어 있음
+
+````
+<!-- Hello, there !! I have a gift for you :D Web1000 flag is ISCTF{cheer up!! you guys :D} -->
+````
+
+### Answer flag
+
+````
+ISCTF{cheer up!! you guys :D}
+````
+
 ## [Web2000] Mining collision hashes !!
 
 ## [Bon1500] KiKiKiKiKiKi
