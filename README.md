@@ -1068,6 +1068,25 @@ ISCTF{Pork?!Fork!!}
 
 ## Misc2000
 
+![](Misc2000/NO_MERCY.png)
+
+위 이미지 `NO_MERCY.png`에서 RGB 중 Red channel만을 남기면 아래와 같은 이미지가 된다.
+
+![](Misc2000/NO_MERCY.R.png) 
+
+다음 텍스트를 읽어낼 수 있다.
+
+````
+the answer is
+flag of korea
+````
+
+### Answer flag
+
+````
+flag of korea
+````
+
 ## Misc2300
 
 ## Misc2400
