@@ -2366,3 +2366,26 @@ ISCTF{genius_vigenere!}
 ````
 
 ## [Bon2700] PPAP
+
+### 풀이
+
+첨부파일 `PPAP.zip`의 내용물
+
+````
+$ wc -c PINEAPPLE APPLE PEN1 PEN2
+ 56610 PINEAPPLE
+ 31450 APPLE
+ 18870 PEN1
+ 18868 PEN2
+125798 합계
+````
+
+Pen Pineapple Apple Pen. 3 byte from `PEN1`, 9 byte from `PINEAPPLE`, 5 byte from `APPLE`, 3 byte from `PEN2` 순서로 새 파일을 만든다. 결과로 아래 그림 파일을 얻는다.
+
+![](Bon2700/PPAP.jpg)
+
+### Answer flag
+
+````
+applepencilforipadpro
+````
