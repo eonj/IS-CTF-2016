@@ -1070,9 +1070,11 @@ ISCTF{Pork?!Fork!!}
 
 ![](Misc2000/NO_MERCY.png)
 
+### 풀이
+
 위 이미지 `NO_MERCY.png`에서 RGB 중 Red channel만을 남기면 아래와 같은 이미지가 된다.
 
-![](Misc2000/NO_MERCY.R.png) 
+![](Misc2000/NO_MERCY.R.png)
 
 다음 텍스트를 읽어낼 수 있다.
 
@@ -1089,7 +1091,392 @@ flag of korea
 
 ## Misc2300
 
+### 풀이
+
+첨부파일 `1fb16ce2d91f0bde43ce1678fc7392fd.zip`
+
+5중으로 압축된 1.zip, 2.zip, ..., 9.zip. 각 이미지 파일에는 ASCII GL 문자가 17글자씩 들어가 렌더링되어 있음.
+
+이미지 총 9 \* 9 \* 9 \* 9 \* 9 = 59,049개.
+
+1. 우선 압축 파일을 재귀적으로 모두 압축 해제를 한 뒤 PNG 파일을 모은다. C# 코드를 작성하여 수행하였다. (코드 첨부함)
+2. 이렇게 모은 PNG 파일들은 모두 고정된 크기로, 내용으로는 고정된 폰트/크기의 17글자짜리 문자열이 들어있다. C# 코드를 사용하여, 이미지의 각 문자 영역을 사용자가 입력한 문자열과 매칭해서 기억해두는 프로그램을 작성했다. (코드 첨부함) 해당 프로그램이 PNG 이미지들이 사용하는 문자들을 전부(총 94개) 기억하면 나머지 처리하지 않은 이미지에 대해서도 이미지를 문자열로 변환할 수 있게 된다.
+3. 위 프로그램을 사용하여 전체 이미지의 내용을 해석한 문자열을 실제 텍스트 파일로 출력한다. (텍스트 덤프 첨부함)
+4. Flag로 텍스트 파일 내에서 검색하면 문자열 `Flag=V!oL3n7Lu9i@`을 찾을 수 있다. `Flag=` 뒤에 있는 값이 문제가 요구하는 키값.
+
+### 재귀 압축 해제 코드: CTFZipExtractor
+
+````csharp
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.IO;
+using System.IO.Compression;
+using System.Collections.Generic;
+using System.Drawing;
+
+namespace CTFZipExtractor
+{
+	class Program
+	{
+		const string    seedfile    = @"1fb16ce2d91f0bde43ce1678fc7392fd.zip";
+		const string	workdir		= @"work\";
+
+		void ProcessZip(string filename, Queue<string> namequeue, bool firstIter = false)
+		{
+			var nameWoExt   = firstIter? "" : Path.GetFileNameWithoutExtension(filename);
+
+			using (var zipFileToOpen = new FileStream(workdir + filename, FileMode.Open))
+			using (var archive = new ZipArchive(zipFileToOpen, ZipArchiveMode.Read))
+			{
+				foreach (var zipArchiveEntry in archive.Entries)
+				{
+					if (zipArchiveEntry.Name.Length == 0)
+						continue;
+
+					var archname    = nameWoExt + zipArchiveEntry.Name;
+					zipArchiveEntry.ExtractToFile(workdir + archname);
+
+					if (Path.GetExtension(archname) == ".zip")
+					{
+						namequeue.Enqueue(archname);
+					}
+				}
+			}
+
+			if (!firstIter)
+				File.Delete(workdir + filename);
+		}
+
+		static void Main(string[] args)
+		{
+			var program = new Program();
+			program.ZipWork();
+			//program.PNGSearch();
+			//program.PNGMake();
+		}
+
+		void ZipWork()
+		{
+			var queue   = new Queue<string>();
+
+			ProcessZip(seedfile, queue, true);
+
+			while (queue.Count > 0)
+			{
+				var name    = queue.Dequeue();
+				ProcessZip(name, queue);
+				Console.Out.WriteLine("processed : {0}", name);
+			}
+		}
+	}
+}
+````
+
+### 문자 인식 코드: CTFShitProcessor
+
+````csharp
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.IO;
+using System.Drawing;
+
+namespace CTFShitProcessor
+{
+	class ChunkDict
+	{
+		Bitmap[]        m_chunks;
+
+
+		public ChunkDict()
+		{
+			m_chunks    = new Bitmap[128];
+
+			LoadLearntChunks();
+		}
+		void LoadLearntChunks()
+		{
+			var files   = Directory.GetFiles(Program.c_pathLearning);
+			var count   = files.Length;
+
+			for(var i = 0; i < count; i++)
+			{
+				var path    = files[i];
+				var c       = byte.Parse(Path.GetFileNameWithoutExtension(path));
+				using (var loadbmp = new Bitmap(path))
+					m_chunks[c] = new Bitmap(loadbmp);
+			}
+		}
+
+		void SaveLearntChunk(byte character)
+		{
+			var path    = Program.c_pathLearning + character.ToString() + ".png";
+			if (File.Exists(path)) File.Delete(path);
+			m_chunks[character].Save(path);
+		}
+
+		public void Match(CutImage cimg)
+		{
+			for(var i = 0; i < CutImage.c_charCount; i++)
+			{
+				var chunk   = cimg.GetChunk(i);
+				var match   = Lookup(chunk);
+				cimg.SetMatchingChar(i, match);
+			}
+		}
+
+		public void Learn(CutImage cimg, string str)
+		{
+			var byteArr = Encoding.ASCII.GetBytes(str);
+			for (var i = 0; i < CutImage.c_charCount; i++)
+			{
+				var c		= byteArr[i];
+				m_chunks[c]	= cimg.GetChunk(i);
+
+				SaveLearntChunk(c);
+			}
+		}
+
+		byte Lookup(Bitmap targetChunk)
+		{
+			var count   = m_chunks.Length;
+			for(var i = 0; i < count; i++)
+			{
+				var learntChunk = m_chunks[i];
+				if (learntChunk != null && AreChunksSame(targetChunk, learntChunk))
+				{
+					return (byte)i;
+				}
+			}
+			return 0;
+		}
+
+		bool AreChunksSame(Bitmap b1, Bitmap b2)
+		{
+			return CheckWithPadding(b1, b2, 0)
+				|| CheckWithPadding(b1, b2, 1)
+				|| CheckWithPadding(b1, b2, -1);
+		}
+
+		bool CheckWithPadding(Bitmap b1, Bitmap b2, int xoffset)
+		{
+			var width		= b1.Width - Math.Abs(xoffset);
+			var height		= b1.Height;
+
+			var b1_basex    = Math.Max(0, xoffset);
+			var b2_basex    = -Math.Min(0, xoffset);
+
+			for (var y = 0; y < height; y++)
+			{
+				for (var x = 0; x < width; x++)
+				{
+					if (b1.GetPixel(x + b1_basex, y) != b2.GetPixel(x + b2_basex, y))
+						return false;
+				}
+			}
+
+			return true;
+		}
+	}
+
+	class CutImage
+	{
+		public const int   c_charCount		= 17;
+		public const int   c_leftPadding   = 4;
+		public const int   c_widthPerChar  = 8;
+		public const int   c_heightPerChar = 16;
+
+		Bitmap		m_original;
+		byte[]      m_matching;
+		ChunkDict   m_chunkDict;
+
+		public CutImage(ChunkDict chunkDict)
+		{
+			m_chunkDict = chunkDict;
+			m_matching  = new byte[17];
+		}
+
+		public Bitmap GetChunk(int index)
+		{
+			var chunk   = new Bitmap(c_widthPerChar, c_heightPerChar);
+			var baseX   = c_leftPadding + (c_widthPerChar * index);
+			var baseY   = 0;
+
+			for (var y = 0; y <c_heightPerChar; y++)
+				for (var x = 0; x < c_widthPerChar; x++)
+				{
+					chunk.SetPixel(x, y, m_original.GetPixel(baseX + x, baseY + y));
+				}
+
+			return chunk;
+		}
+
+		public void SetMatchingChar(int index, byte character)
+		{
+			m_matching[index] = character;
+		}
+
+		public bool hasFullMatching()
+		{
+			m_chunkDict.Match(this);
+			for (var i = 0; i < m_matching.Length; i++)
+			{
+				if (m_matching[i] == 0)
+					return false;
+			}
+			return true;
+		}
+
+		public string GetFullMatchingString()
+		{
+			if (!hasFullMatching())
+				return "(string matching imcomplete!)";
+
+			return Encoding.ASCII.GetString(m_matching);
+		}
+
+		public void Load(string path)
+		{
+			m_original  = new Bitmap(path);
+		}
+	}
+
+
+	class Program
+	{
+		public const string		c_pathTarget	= @"target\";
+		public const string		c_pathLearning	= @"learn\";
+
+		static void Main(string[] args)
+		{
+			var usageError  = false;
+
+			if (args.Length <= 0)
+			{
+				usageError  = true;
+			}
+			else
+			{
+				var func        = args[0];
+				var chunkDict   = new ChunkDict();
+
+				switch (func)
+				{
+					case "-learn":
+						if (args.Length != 2)
+							usageError  = true;
+						else
+						{
+							var filename	= c_pathTarget + args[1];
+
+							if (!File.Exists(filename))
+								Console.Out.WriteLine("error : file not exists");
+							else
+							{
+								var image   = new CutImage(chunkDict);
+								image.Load(filename);
+
+								Console.Out.Write("enter the matching string : ");
+
+								var matching    = Console.In.ReadLine();
+								if (matching.Length != CutImage.c_charCount)
+									Console.Out.WriteLine("error : string length must be " + CutImage.c_charCount);
+								else
+								{
+									chunkDict.Learn(image, matching);
+
+									Console.Out.WriteLine("learnt! press any key to continue");
+									Console.In.ReadLine();
+								}
+							}
+						}
+						break;
+
+					case "-check":
+						if (args.Length != 2)
+							usageError  = true;
+						else
+						{
+							var filename    = c_pathTarget + args[1];
+
+							if (!File.Exists(filename))
+								Console.Out.WriteLine("error : file not exists");
+							else
+							{
+								var image   = new CutImage(chunkDict);
+								image.Load(filename);
+								Console.Out.WriteLine("matching : " + image.GetFullMatchingString());
+								Console.In.ReadLine();
+							}
+						}
+						break;
+
+					case "-scan":
+						if (args.Length != 1)
+							usageError  = true;
+						else
+						{
+							var files   = Directory.GetFiles(c_pathTarget);
+							var count   = files.Length;
+							for(var i = 0; i < count; i++)
+							{
+								var image   = new CutImage(chunkDict);
+								var path    = files[i];
+								image.Load(path);
+
+								Console.Out.WriteLine("{0}:{1}", path, image.GetFullMatchingString());
+							}
+						}
+						break;
+
+					case "-scannomatch":
+						if (args.Length != 1)
+							usageError  = true;
+						else
+						{
+							var files   = Directory.GetFiles(c_pathTarget);
+							var count   = files.Length;
+							for (var i = 0; i < count; i++)
+							{
+								var image   = new CutImage(chunkDict);
+								var path    = files[i];
+								image.Load(path);
+
+								if (!image.hasFullMatching())
+									Console.Out.WriteLine(path);
+							}
+						}
+						break;
+				}
+			}
+
+			if (usageError)
+			{
+				Console.Out.WriteLine("Usage : ");
+				Console.Out.WriteLine("			CTFShitProcessor -learn <image>");
+				Console.Out.WriteLine("			CTFShitProcessor -check <image>");
+				Console.Out.WriteLine("			CTFShitProcessor -scan");
+				Console.Out.WriteLine("			CTFShitProcessor -scannomatch");
+			}
+		}
+	}
+}
+````
+
+### Answer flag
+
+````
+V!oL3n7Lu9i@
+````
+
 ## Misc2400
+
+
 
 ## Misc2500
 
