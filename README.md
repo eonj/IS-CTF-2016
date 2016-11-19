@@ -1468,6 +1468,51 @@ namespace CTFShitProcessor
 }
 ````
 
+### output.txt
+
+````
+target\11111-.png:PBhh\e]@B5_CjwLD<
+target\11112-.png:FlZ.2?1t@thb++IWt
+target\11113-.png:[N719GZ?KSRuNpv)d
+target\11114-.png:sBHMw#9o`(f2`8k]`
+target\11115-.png:0L\CvwI-*eF5wblO3
+target\11116-.png:2(V31+DW.k{aQ@6DB
+target\11117-.png:RI/BBec_&6,l/?yxP
+target\11118-.png:UsaMBA/,\QkqUAIx0
+target\11119-.png:uACk&PC5BfJ7-8Vd)
+target\11121-.png:80ONST1gkXa'6/^3,
+target\11122-.png:4,xJv1C+ZyW;-/a(]
+target\11123-.png:1/'k,:).JH0`EpS&.
+target\11124-.png:|R?o9c*43@o11\r={
+target\11125-.png:^/88DU(_]nMe5r+#w
+target\11126-.png:)Y#*nR@fXkJmloKuK
+target\11127-.png:%i6:BM3{dle>FtAyU
+target\11128-.png:NJg*s4;wx/rN@$2>I
+target\11129-.png:%J4_q}jzFxr&37U6C
+target\11131-.png:QJ2aDMuq<D5nIK?|:
+target\11132-.png:03#FC'WAy{aknhMnX
+target\11133-.png:B_b/"nc`:}zHoOuI`
+target\11134-.png:/lpuKVe?3w,j{r{.-
+(...)
+target\47289-.png:u!AI+TyW6N6BCL&;X
+target\47291-.png:Flag=V!oL3n7Lu9i@
+target\47292-.png:L69\5k'xTk93eSX1*
+(...)
+target\99986-.png:x,qnn&+_Hk|b!w,#n
+target\99987-.png:YUZ?0#s]LDd;3`k|u
+target\99988-.png:[7[<=YPzf%cmi=oUz
+target\99989-.png:RFxg5VU-I'T~#UN|Y
+target\99991-.png:"=ts?OZ*{zFC4(Kir
+target\99992-.png:)3#(H1gs5C6T7)[ez
+target\99993-.png:J/27i0]Z]7&vAl\X2
+target\99994-.png:kn4P:dC#XJ^r[V(7B
+target\99995-.png:1F?dkL,mU:GV=Z_"'
+target\99996-.png:]Axf'iuk]F0d~:#n'
+target\99997-.png:^@+d!ajV+_P1Bn8ff
+target\99998-.png:nk+pg7[[Z.qXp65/x
+target\99999-.png:_x<4nIMc$Lwl-|UG-
+````
+
 ### Answer flag
 
 ````
