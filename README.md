@@ -1496,7 +1496,7 @@ learn 폴더 내용 (위 11111-.png 입력 후)
 
 ### 문자 인식 실행 결과
 
-ASCII GL 내 모든 문자에 대해 이미지가 확보되면 `./CTFShitProcessor -scan` 명령을 통해 다음 내용을 확보할 수 있다.
+ASCII GL 내 모든 문자에 대해 이미지가 확보되면 `./CTFShitProcessor -scan > output.txt` 명령을 통해 다음 내용을 확보할 수 있다.
 
 ````
 target\11111-.png:PBhh\e]@B5_CjwLD<
@@ -1549,9 +1549,65 @@ V!oL3n7Lu9i@
 
 ## Misc2400
 
+Base64.
 
+### 풀이
+
+첨부된 이미지 `8168474dab4aa9090f3ef6d425665be1.jpeg`는 Password protected content를 포함하고 있다. 파일 패딩에서 다음 내용을 찾을 수 있다.
+
+````
+Password(Not a Flag!) is c3RlZ2Fub2dyYXBoeQ==
+````
+
+7-Zip File Manager를 이용해 JPEG 컨테이너 내의 보호된 파일을 찾을 수 있었다. 패스워드는 `c3RlZ2Fub2dyYXBoeQ==`이다. (이 값을 base64 decode한 `steganography`가 아님)
+
+보호된 파일 이름은 `c29sdXRpb24=`이다. (`solution`을 base64 encode한 값임)
+
+파일 내용은 다음과 같다.
+
+````
+VGhlIGFuc3dlciBpcyBTVzVtYjNKdFlYUnBiMjVmVTJWamRYSnBkSGxmUTFSR1gyUmhkR1U9
+````
+
+이것은 다음 내용의 Base64 encoding이다.
+
+````
+The answer is SW5mb3JtYXRpb25fU2VjdXJpdHlfQ1RGX2RhdGU=
+````
+
+### Answer flag
+
+````
+SW5mb3JtYXRpb25fU2VjdXJpdHlfQ1RGX2RhdGU=
+````
+
+(이 값을 base64 decode한 `Information_Security_CTF_date`가 아님)
 
 ## Misc2500
+
+### 풀이
+
+문제 힌트 `Tar lshsdaf'es pod wiroaposily`는 애너그램이다.
+
+`The password is aprilfools'day`
+
+문제 첨부파일 `Unzip_me!!!!.zip`은 패스워드로 보호된 PKZip 압축 아카이브 파일이다.
+
+아카이브 파일 패스워드: `aprilfools'day`
+
+내부 파일인 `not_a_windows_script_file.ws`는 Whitespace 프로그래밍 언어로 작성된 소스 코드 파일이다. (난해한 프로그래밍 언어로, 만우절에 발표됨)
+
+실행 결과:
+
+````
+The answer is d2pkcWhxaGdoV0tE
+````
+
+### Answer flag
+
+````
+d2pkcWhxaGdoV0tE
+````
 
 ## Misc2600
 
