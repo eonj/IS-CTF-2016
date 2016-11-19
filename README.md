@@ -1865,6 +1865,128 @@ ISCTF{y0Uar3PythoN_|^.^|_goSu~!@}
 
 ## Misc2700
 
+### 풀이
+
+문제 첨부파일 `rev2700_fixed`은 i386 32비트 ELF LSB 실행파일이다.
+
+Long Long int가 4개 존재하는데, 이중 2개는 덮어씌워지므로 나머지 2개의 integer만 중요.
+
+xor의 역연산은 xor이므로 필요한 값들만 가져와 역연산하면 됨.
+
+아래는 주어진 파일을 디컴파일한 코드이다.
+
+````
+if ( argc == 2 )
+  {
+    if ( strlen(argv[1]) == 16 )
+    {
+      s2 = 0LL;
+      v8 = 0LL;
+      v9 = 0;
+      v10 = 48;
+      v11 = 64;
+      v12 = 64;
+      v13 = 48;
+      v14 = 64;
+      v15 = 48;
+      v16 = 32;
+      v17 = 48;
+      v18 = 48;
+      v19 = 64;
+      v20 = 48;
+      v21 = 48;
+      v22 = 0;
+      v23 = 64;
+      v24 = 64;
+      v25 = 2338898147514671427LL;
+      v26 = 2334398917027194226LL;
+      v27 = 8030604370232567924LL;
+      v28 = 2970722360994394727LL;
+      v29 = 0;
+      for ( i = 0; i < 32; ++i )
+        *((_BYTE *)&s2 + i % 16) = *((_BYTE *)&v25 + i) ^ argv[1][i % 16];
+      for ( j = 0; j < 16; ++j )
+        *((_BYTE *)&s2 + j) ^= *(&v9 + j);
+      if ( !memcmp("1lZJObq920rlaGEH", &s2, 0x10uLL) )
+      {
+        puts("Correct !! ");
+        printf("The flag is ISCTF{%s}\n", argv[1], argv);
+      }
+      else
+      {
+        puts("Nop, nop, its not! :( ");
+      }
+      result = 0;
+    }
+    else
+    {
+      puts("the passcode length must be 16 ");
+      result = -1;
+    }
+  }
+````
+
+아래 직접 작성한 코드를 컴파일해 flag를 얻는다. Endianness에 주의! (LE임)
+
+````
+#include <stdio.h>
+#include <string.h>
+
+int main()
+{
+  unsigned long long s2=0;
+  unsigned long long v8=0;
+  unsigned char v[50];
+  v[9] = 0;
+  v[10] = 48;
+  v[11] = 64;
+  v[12] = 64;
+  v[13] = 48;
+  v[14] = 64;
+  v[15] = 48;
+  v[16] = 32;
+  v[17] = 48;
+  v[18] = 48;
+  v[19] = 64;
+  v[20] = 48;
+  v[21] = 48;
+  v[22] = 0;
+  v[23] = 64;
+  v[24] = 64;
+  char v27a[20] = { 0x74,0x68,0x69,0x73,0x20,0x70,0x72,0x6F };
+  char v28a[20] = { 0x67,0x72,0x61,0x6D,0x3F,0x20,0x3A,0x29 };
+  unsigned long long v27 = 8030604370232567924;
+  unsigned long long v28 = 2970722360994394727;
+
+  char ans[17] = { "1lZJObq920rlaGEH" };
+  int i,j;
+
+  for (i = 0; i < 16; i++)
+  {
+    ans[i] ^= v[9 + i];
+  }
+  for (i = 0; i < 8; i++)
+  {
+    ans[i] = (ans[i] ^ v27a[i]);
+  }
+  for (i = 0; i < 8; i++)
+  {
+    ans[i + 8] = (ans[i + 8] ^ v28a[i]);
+  }
+  for (i = 0; i < 16; i++)
+  {
+    printf("%d ", ans[i]);
+  }
+  return 0;
+}
+````
+
+### Answer flag
+
+````
+ISCTF{E4sy_R3verS1ng?!}
+````
+
 ## Misc2800
 
 ## Misc3000
